@@ -1,0 +1,30 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+chrome = r'C:\Users\Administrator\Desktop\chromedriver.exe'
+chrome_options=Options()
+chrome_options.add_argument('--headless')
+driver = webdriver.Chrome(executable_path=chrome)
+data = pandas.read_excel(r'C:\Users\Administrator\Desktop\11-2数据.xlsx')
+awb = data['awb'].tolist()
+for i in awb:
+    url = 'http://www.cn.dhl.com/exp-zh/express/tracking.html?AWB=%d&brand=DHL' % i
+    driver.get(url)
+    time.sleep(3)
+    wb_data = driver.page_source
+    soup = BeautifulSoup(wb_data, 'lxml')
+    div = soup.find('div', class_='result-pieces')
+    try:
+        pid = div.findAll('li')
+        if len(pid) == 1:
+            print(i, pid)
+        else:
+            print(i, len(pid), end=' ')
+            for i in pid:
+                print(i.text, end='|')
+            print('\n')
+    except:
+        print(i, 'fail')
